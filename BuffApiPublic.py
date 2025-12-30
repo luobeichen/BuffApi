@@ -223,7 +223,7 @@ class BuffAccount:
         }
         return json.loads(requests.get('https://buff.163.com/api/market/items', params=parameters,).text).get('info')
     
-    def get_items(self, goods_ids : List[int], min_price = 0) -> dict:
+    def get_float_items(self, goods_ids : List[int], min_price = 0) -> dict:
         """查询饰品磨损区间最低价格、渐变度区间最低价格、磨损区间在售数量、饰品流通性百分比。
             可用服务：开发者API 或 企业API
             查询范围：全站饰品，每日最多查询其中200个饰品，当日已查询的可重复查询。
@@ -237,11 +237,48 @@ class BuffAccount:
             goods_ids (_type_): 饰品id列表，必需。
             min_price (int, optional): _description_. Defaults to 0.
 
-        Returns:
-            dict: _description_
         """
         parameters = {
             'goods_ids': goods_ids,
             'min_price': min_price,
         }
-        return json.loads(requests.post('https://buff.163.com/api/market/float/items', json=parameters,).text).get('info')
+        return json.loads(requests.post('https://buff.163.com/api/market/float/items', json=parameters).text).get('info')
+
+    def get_balance(self) -> dict:
+        """查询BUFF余额与求购金余额。
+
+            可用服务：开发者API 或 企业API
+            更新频率：实时
+            请求次数：60次/分钟
+            备注：
+            使用API发起的求购不支持使用网易支付/微信支付，仅支持使用BUFF余额和求购金支付，求购方式为先求后付。
+            求购金有效期150天，过期后退回至您的银行卡，如退回后您的BUFF账户【BUFF余额+求购金】金额低于求购订单金额，该笔求购订单自动取消。
+
+        """
+        return json.loads(requests.get('https://buff.163.com/api/market/developer/balance').text)
+    
+
+    def get_buy_order_status(self) -> dict:
+        """查询求购状态，在线或离线。
+
+        可用服务：开发者API 或 企业API
+        更新频率：实时
+        请求次数：60次/分钟
+
+        """
+        return json.loads(requests.get('https://buff.163.com/api/market/developer/buy_order/status').text)
+    
+    
+    def set_buy_order_status(self, buy_order_status : bool, buy_order_auto_offline : bool) -> dict:
+        """设置求购状态，在线或离线。设置求购自动离线，即被供应1笔订单后自动离线。
+
+            可用服务：开发者API 或 企业API
+            请求次数：60次/分钟
+
+        """
+        buy_order_status : str = "online" if buy_order_status else "offline"
+        statuse = {
+        "buy_order_status": buy_order_status,
+        "buy_order_auto_offline": buy_order_auto_offline
+        }
+        return json.loads(requests.put('https://buff.163.com/api/market/developer/buy_order/status', json=statuse).text)
