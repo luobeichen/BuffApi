@@ -13,6 +13,7 @@
 
 import json
 import time
+from typing import List
 
 import requests
 import random
@@ -221,3 +222,26 @@ class BuffAccount:
             'include_sticker': include_sticker
         }
         return json.loads(requests.get('https://buff.163.com/api/market/items', params=parameters,).text).get('info')
+    
+    def get_items(self, goods_ids : List[int], min_price = 0) -> dict:
+        """查询饰品磨损区间最低价格、渐变度区间最低价格、磨损区间在售数量、饰品流通性百分比。
+            可用服务：开发者API 或 企业API
+            查询范围：全站饰品，每日最多查询其中200个饰品，当日已查询的可重复查询。
+            更新频率：饰品流通性1天/次，其余数据10分钟/次
+            请求次数：10000次/月
+            备注：
+            goods_id 为必需，不能为空。
+            饰品流通性：大比例成交金额排名与小比例成交量排名加权计算，通常认为≥85%饰品较热门。
+
+        Args:
+            goods_ids (_type_): 饰品id列表，必需。
+            min_price (int, optional): _description_. Defaults to 0.
+
+        Returns:
+            dict: _description_
+        """
+        parameters = {
+            'goods_ids': goods_ids,
+            'min_price': min_price,
+        }
+        return json.loads(requests.post('https://buff.163.com/api/market/float/items', json=parameters,).text).get('info')
