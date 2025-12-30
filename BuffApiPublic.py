@@ -197,3 +197,27 @@ class BuffAccount:
 
     def get_steam_trade(self) -> dict:
         return json.loads(self.session.get("https://buff.163.com/api/market/steam_trade").text).get('data')
+
+    def get_items(self, goods_id, include_sticker, min_price = 0, game_name='csgo') -> dict:
+        """查询饰品在售最低价格。
+            可用服务：开发者API 或 企业API
+            查询范围：全站饰品
+            更新频率：include_sticker为0时，5分钟/次；include_sticker为1时，10分钟/次
+            请求次数：10000次/月
+            备注：goods_id 非必需，若不指定，则1次请求返回全站有在售的饰品价格，约2万饰品。
+        Args:
+            min_price (number): 在售价格过滤参数，非必需。
+            goods_id (string): 指定单个饰品ID，非必需。
+            include_sticker (integer): 仅在未指定 goods_id 时生效，include_sticker 为 0 时，返回结果不含涂鸦，印花与印花板饰品，数据更实时。
+            game_name (str): 游戏ID，必需。
+
+        Returns:
+            dict: _description_
+        """
+        parameters = {
+            'game': game_name,
+            'goods_id': goods_id,
+            'min_price': min_price,
+            'include_sticker': include_sticker
+        }
+        return json.loads(requests.get('https://buff.163.com/api/market/items', params=parameters,).text).get('info')
